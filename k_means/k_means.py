@@ -6,10 +6,10 @@ import pandas as pd
 
 class KMeans:
     
-    def __init__():
-        # NOTE: Feel free add any hyperparameters 
-        # (with defaults) as you see fit
-        pass
+    def __init__(self,K=2):
+        
+        self.centroids=None
+        self.K=K
         
     def fit(self, X):
         """
@@ -20,7 +20,49 @@ class KMeans:
                 m rows (#samples) and n columns (#features)
         """
         # TODO: Implement
-        raise NotImplemented()
+        new_centroids=X.sample(self.K).to_numpy().tolist()
+        centroids=[]
+        clusters={}
+        for k in range (self.K):
+            clusters[k] = []
+        depth=100
+        q=0
+        
+        while True:
+            
+            print(f'centroids{centroids}, depth{q}')
+            print(f'new centroids{new_centroids}, depth{q}')
+            
+            q+=1
+            if q==depth:
+                break
+            for n in range (len(X)):
+                sample= X.iloc[n].to_numpy()
+                a=1000000
+                for c in range(self.K):
+                    b= euclidean_distance(np.array(new_centroids[c]), sample)
+                    if b<a:
+                        a=b
+                        d=c
+                clusters[d].append(sample.tolist())    
+                    
+            centroids=new_centroids
+            
+            for i in range (self.K):
+                new_centroids[i]=self.mean(clusters[i]).tolist()
+                
+            if np.allclose(sorted(centroids),sorted(new_centroids)):
+                break
+        print (q)  
+        self.centroids=new_centroids
+                
+    def mean(self,dataset):
+                # Convert the list of lists to a NumPy array
+        dataset_array = np.array(dataset)
+
+        # Calculate the mean along each dimension (axis)
+        return np.mean(dataset_array, axis=0)
+                  
     
     def predict(self, X):
         """
@@ -39,7 +81,22 @@ class KMeans:
             could be: array([2, 0, 0, 1, 2, 1, 1, 0, 2, 2])
         """
         # TODO: Implement 
-        raise NotImplemented()
+ 
+        z=[]
+        for n in range (len(X)):
+            sample= X.iloc[n].to_numpy()
+            a=1000000
+            for c in range(self.K):
+                b= euclidean_distance(np.array(self.centroids[c]), sample)
+                if b<a:
+                    a=b
+                    d=c
+            z.append(d)
+        return np.array(z)
+    
+            
+    
+    
     
     def get_centroids(self):
         """
@@ -56,8 +113,18 @@ class KMeans:
             [xm_1, xm_2, ..., xm_n]
         ])
         """
-        pass
+        return np.array(self.centroids)
     
+    
+    def are_float_lists_equal(self, list1, list2, tolerance=1e-10):
+        if len(list1) != len(list2):
+            return False
+        
+        for val1, val2 in zip(list1, list2):
+            for val3, val4 in zip(val1, val2):
+                if abs(val3 - val4) > tolerance:
+                    return False
+        return True
     
     
     
@@ -111,6 +178,7 @@ def euclidean_distortion(X, z):
     for i, c in enumerate(clusters):
         Xc = X[z == c]
         mu = Xc.mean(axis=0)
+
         distortion += ((Xc - mu) ** 2).sum(axis=1)
         
     return distortion
