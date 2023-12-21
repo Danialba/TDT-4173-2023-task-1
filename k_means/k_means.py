@@ -20,19 +20,17 @@ class KMeans:
                 m rows (#samples) and n columns (#features)
         """
         # TODO: Implement
-        new_centroids=X.sample(self.K).to_numpy().tolist()
+        new_centroids = X.sample(self.K).values.tolist()
+        self.centroids=new_centroids
         centroids=[]
         clusters={}
         for k in range (self.K):
             clusters[k] = []
-        depth=100
+        depth=5
         q=0
         
         while True:
-            
-            print(f'centroids{centroids}, depth{q}')
-            print(f'new centroids{new_centroids}, depth{q}')
-            
+    
             q+=1
             if q==depth:
                 break
@@ -46,16 +44,21 @@ class KMeans:
                         d=c
                 clusters[d].append(sample.tolist())    
                     
-            centroids=new_centroids
+            centroids=new_centroids.copy()
             
             for i in range (self.K):
                 new_centroids[i]=self.mean(clusters[i]).tolist()
                 
-            if np.allclose(sorted(centroids),sorted(new_centroids)):
+            if np.allclose(sorted(centroids),sorted(new_centroids)) and q==depth:
                 break
-        print (q)  
         self.centroids=new_centroids
+        
                 
+
+            
+        
+        
+                     
     def mean(self,dataset):
                 # Convert the list of lists to a NumPy array
         dataset_array = np.array(dataset)
